@@ -1,0 +1,19 @@
+---
+- name: Create New Users
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Include vars of users.yaml into the 'data' variable.
+      ansible.builtin.include_vars:
+        file: users.yaml
+        name: data
+    - name: Create User
+      ansible.builtin.user:
+        name: "{{ item.username }}"
+        state: present
+        shell: /bin/bash
+        update_password: on_create
+        groups: "{{ item.groups }}"
+        append: yes
+      loop: "{{ data.users }}"

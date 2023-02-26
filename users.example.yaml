@@ -1,0 +1,8 @@
+users:
+  - username: USER
+    ssh_key: KEY
+    groups:
+      - wheel
+      - docker
+      - root
+      - devops

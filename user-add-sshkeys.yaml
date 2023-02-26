@@ -1,0 +1,16 @@
+---
+- name: Create New Users
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Include vars of users.yaml into the 'data' variable.
+      ansible.builtin.include_vars:
+        file: users.yaml
+        name: data
+    - name: Set authorized keys taken from url
+      ansible.posix.authorized_key:
+        user: "{{ item.username }}"
+        state: present
+        key: "{{ item.ssh_key }}"
+      loop: "{{ data.users }}"
