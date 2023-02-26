@@ -73,27 +73,6 @@
         name: "docker"
         state: started
         enabled: yes
-- name: Install AWS CLI
-  hosts: centos_docker
-  become: yes
-  gather_facts: yes
-  tasks:
-    - name: Download AWS CLI
-      shell: curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-    - name: Unzip AWS CLI
-      shell: unzip awscliv2.zip
-    - name: Run installer
-      shell: ./aws/install
-    - name: Remove zip file
-      shell: rm awscliv2.zip
-- name: Install Digital Ocean metrics
-  hosts: centos_docker
-  become: yes
-  gather_facts: yes
-  tasks:
-    - name: Install DO metrics
-      shell: curl -sSL https://repos.insights.digitalocean.com/install.sh | sudo bash
-
 - name: Install telegraf
   hosts: centos_docker
   become: yes
@@ -118,3 +97,10 @@
         name: "influxdb"
         state: started
         enabled: yes
+- name: Install Digital Ocean metrics
+  hosts: centos_docker
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Install DO metrics
+      shell: curl -sSL https://repos.insights.digitalocean.com/install.sh | sudo bash
