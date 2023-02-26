@@ -1,13 +1,13 @@
 ---
 - name: Update existing dependencies
-  hosts: hosts
+  hosts: centos_docker
   become: yes
   gather_facts: yes
   tasks:
     - name: upgrade all packages
       yum: name=* state=latest
 - name: Install dependencies
-  hosts: hosts
+  hosts: centos_docker
   become: yes
   gather_facts: no
   tasks:
@@ -55,13 +55,13 @@
         state: latest
         update_cache: true
 - name: Install docker
-  hosts: hosts
+  hosts: centos_docker
   become: yes
   gather_facts: yes
   tasks:
     - name: Add CentOS_o repository
       shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-    - name: Install python3
+    - name: Install docker
       vars:
         ansible_python_interpreter: /usr/bin/python
       yum:
@@ -74,7 +74,7 @@
         state: started
         enabled: yes
 - name: Install AWS CLI
-  hosts: hosts
+  hosts: centos_docker
   become: yes
   gather_facts: yes
   tasks:
@@ -87,12 +87,34 @@
     - name: Remove zip file
       shell: rm awscliv2.zip
 - name: Install Digital Ocean metrics
-  hosts: hosts
+  hosts: centos_docker
   become: yes
   gather_facts: yes
   tasks:
     - name: Install DO metrics
       shell: curl -sSL https://repos.insights.digitalocean.com/install.sh | sudo bash
 
-
-#Install telegraf on the host
+- name: Install telegraf
+  hosts: centos_docker
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Add CentOS_o repository
+      shell: cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+        [influxdb]
+        name = InfluxDB Repository - RHEL \$releasever
+        baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+        enabled = 1
+        gpgcheck = 1
+        gpgkey = https://repos.influxdata.com/influxdata-archive_compat.key
+        EOF
+    - name: Install influxdb
+      yum:
+        name: influxdb
+        update_cache: yes
+        state: present
+    - name: Starting docker service
+      service:
+        name: "influxdb"
+        state: started
+        enabled: yes

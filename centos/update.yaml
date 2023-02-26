@@ -1,0 +1,8 @@
+---
+- name: Update existing dependencies
+  hosts: centos
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: upgrade all packages
+      yum: name=* state=latest

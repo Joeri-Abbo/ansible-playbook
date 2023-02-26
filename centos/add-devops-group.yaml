@@ -1,6 +1,6 @@
 ---
 - name: Add devops group
-  hosts: all
+  hosts: centos
   become: yes
   tasks:
     - name: Create devops group

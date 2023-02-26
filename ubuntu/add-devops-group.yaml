@@ -1,0 +1,14 @@
+---
+- name: Add devops group
+  hosts: ubuntu
+  become: yes
+  tasks:
+    - name: Create devops group
+      group:
+        name: devops
+        state: present
+
+    - name: Create devops user
+      user:
+        name: devops
+        group: devops
