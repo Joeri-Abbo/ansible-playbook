@@ -1,5 +1,4 @@
----
-- name: Update existing dependencies
+- name: Install dependencies
   hosts: ubuntu_slave
   become: yes
   gather_facts: yes
@@ -8,9 +7,71 @@
       apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
     - name: Upgrade all apt packages
       apt: upgrade=dist force_apt_get=yes
----
+    - name: Install utils
+      apt:
+        pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - htop
+          - chromium-browser
+          - software-properties-common
+        state: latest
+        update_cache: true
+    - name: Install docker
+      apt:
+        pkg:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: latest
+        update_cache: true
+    - name: Install language components
+      apt:
+        pkg:
+          - node-typescript
+          - npm
+        state: latest
+        update_cache: true
+    - name: Add specified repository into sources list
+      ansible.builtin.apt_repository:
+        repo: ppa:ansible/ansible
+        state: present
+    - name: Add specified repository into sources list
+      ansible.builtin.apt_repository:
+        repo: ppa:deadsnakes/ppa
+        state: present
+    - name: Install ansible
+      apt:
+        pkg:
+          - ansible
+          - python3-pip
+          - python3-paramiko
+          - mailutils-mh
+          - python3.10
+        state: latest
+        update_cache: true
+    - name: Install ansible-pylibssh
+      become: yes
+      pip:
+        name:
+          - ansible-pylibssh
+    - name: Install docker
+      shell: |
+        sudo mkdir -m 0755 -p /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        chmod a+r /etc/apt/keyrings/docker.gpg
+        echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+
+
+
 - name: Reboot please?
-  hosts: debian
+  hosts: ubuntu_slave
   become: yes
   gather_facts: yes
   tasks:
@@ -19,7 +80,7 @@
       stat: path=/var/run/reboot-required get_md5=no
     - name: Reboot the Debian or Ubuntu server
       reboot:
-        msg: "Reboot initiated by Ansible due to kernel updates"
+        msg: "Reboot initiated due to kernel updates"
         connect_timeout: 5
         reboot_timeout: 300
         pre_reboot_delay: 0
