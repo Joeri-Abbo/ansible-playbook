@@ -7,12 +7,31 @@
       group:
         name: devops
         state: present
+    - name: Create devops group
+      group:
+        name: wheel
+        state: present
 
-    - name: Create devops user
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
+
+    - name: Allow 'wheel' group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: Add sudoers users to wheel group
       user:
-        name: devops
-        group: devops
-
+        name=deployer
+        groups=wheel
+        append=yes
+        state=present
+        createhome=yes
     - name: Give sudo access to devops user
       blockinfile:
         path: /etc/sudoers

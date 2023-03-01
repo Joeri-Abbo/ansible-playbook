@@ -59,6 +59,10 @@
   become: yes
   gather_facts: yes
   tasks:
+    - name: Create devops group
+      group:
+        name: devops
+        state: present
     - name: Add CentOS_o repository
       shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
     - name: Install docker
