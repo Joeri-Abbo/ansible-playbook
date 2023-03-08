@@ -1,0 +1,9 @@
+---
+- name: Update MOTD
+  hosts: all
+  become: true
+  tasks:
+    - name: Copy MOTD file
+      copy:
+        src: motd.txt
+        dest: /etc/motd

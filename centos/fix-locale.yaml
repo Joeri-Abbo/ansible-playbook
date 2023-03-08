@@ -1,0 +1,7 @@
+---
+- name: Fix locale
+  hosts: centos
+  become: true
+  tasks:
+    - name: Fix locale
+      shell: localectl set-locale LC_CTYPE=en_NL.UTF-8

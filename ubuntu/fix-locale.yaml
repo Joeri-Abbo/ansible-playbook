@@ -1,0 +1,9 @@
+---
+- name: Fix locale
+  hosts: ubuntu
+  become: true
+  tasks:
+    - name: Gen locale
+      shell: locale-gen "en_US.UTF-8"
+    - name: Reconfigure locale
+      shell: dpkg-reconfigure locales
