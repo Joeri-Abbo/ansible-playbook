@@ -5,7 +5,9 @@
   gather_facts: yes
   tasks:
     - name: upgrade all packages
-      yum: name=* state=latest
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
 - name: Install dependencies
   hosts: centos_docker
   become: yes
@@ -14,14 +16,14 @@
     - name: Install python3
       vars:
         ansible_python_interpreter: /usr/bin/python
-      yum:
+      ansible.builtin.yum:
         name: python3
         update_cache: yes
         state: present
     - name: Install vim
       vars:
         ansible_python_interpreter: /usr/bin/python
-      yum:
+      ansible.builtin.yum:
         name:
           - vim
           - vim-enhanced
@@ -30,7 +32,7 @@
     - name: Install epel-release
       vars:
         ansible_python_interpreter: /usr/bin/python
-      yum:
+      ansible.builtin.yum:
         name:
           - epel-release
         state: latest
@@ -38,7 +40,7 @@
     - name: Install htop
       vars:
         ansible_python_interpreter: /usr/bin/python
-      yum:
+      ansible.builtin.yum:
         name:
           - htop
         state: latest
@@ -46,7 +48,7 @@
     - name: Install utils
       vars:
         ansible_python_interpreter: /usr/bin/python
-      yum:
+      ansible.builtin.yum:
         name:
           - yum-utils
           - device-mapper-persistent-data
@@ -60,20 +62,26 @@
   gather_facts: yes
   tasks:
     - name: Create devops group
-      group:
+      ansible.builtin.group:
         name: devops
         state: present
     - name: Add CentOS_o repository
-      shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      ansible.builtin.yum_repository:
+        name: docker-ce-stable
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/centos/gpg
     - name: Install docker
       vars:
         ansible_python_interpreter: /usr/bin/python
-      yum:
+      ansible.builtin.yum:
         name: docker-ce
         update_cache: yes
         state: present
     - name: Starting docker service
-      service:
+      ansible.builtin.service:
         name: "docker"
         state: started
         enabled: yes
@@ -82,22 +90,21 @@
   become: yes
   gather_facts: yes
   tasks:
-    - name: Add CentOS_o repository
-      shell: cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
-        [influxdb]
-        name = InfluxDB Repository - RHEL \$releasever
-        baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
-        enabled = 1
-        gpgcheck = 1
-        gpgkey = https://repos.influxdata.com/influxdata-archive_compat.key
-        EOF
+    - name: Add InfluxDB repository
+      ansible.builtin.yum_repository:
+        name: influxdb
+        description: InfluxDB Repository - RHEL $releasever
+        baseurl: https://repos.influxdata.com/rhel/$releasever/$basearch/stable
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://repos.influxdata.com/influxdata-archive_compat.key
     - name: Install influxdb
-      yum:
+      ansible.builtin.yum:
         name: influxdb
         update_cache: yes
         state: present
     - name: Starting docker service
-      service:
+      ansible.builtin.service:
         name: "influxdb"
         state: started
         enabled: yes
@@ -107,4 +114,15 @@
   gather_facts: yes
   tasks:
     - name: Install DO metrics
-      shell: curl -sSL https://repos.insights.digitalocean.com/install.sh | sudo bash
+      ansible.builtin.get_url:
+        url: https://repos.insights.digitalocean.com/install.sh
+        dest: /tmp/do-agent-install.sh
+        mode: "0755"
+    - name: Run DO metrics installer
+      ansible.builtin.command: /tmp/do-agent-install.sh
+      args:
+        creates: /etc/systemd/system/do-agent.service
+    - name: Remove installer
+      ansible.builtin.file:
+        path: /tmp/do-agent-install.sh
+        state: absent

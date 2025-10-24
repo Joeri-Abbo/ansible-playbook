@@ -4,6 +4,6 @@
   become: true
   tasks:
     - name: Gen locale
-      shell: locale-gen "en_US.UTF-8"
+      ansible.builtin.command: locale-gen "en_US.UTF-8"
     - name: Reconfigure locale
-      shell: dpkg-reconfigure locales
+      ansible.builtin.command: dpkg-reconfigure locales

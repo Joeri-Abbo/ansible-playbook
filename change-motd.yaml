@@ -4,6 +4,6 @@
   become: true
   tasks:
     - name: Copy MOTD file
-      copy:
+      ansible.builtin.copy:
         src: motd.txt
         dest: /etc/motd

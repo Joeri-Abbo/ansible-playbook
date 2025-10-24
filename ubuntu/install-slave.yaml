@@ -4,11 +4,16 @@
   gather_facts: yes
   tasks:
     - name: Update apt-get repo and cache
-      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      ansible.builtin.apt:
+        update_cache: true
+        force_apt_get: true
+        cache_valid_time: 3600
     - name: Upgrade all apt packages
-      apt: upgrade=dist force_apt_get=yes
+      ansible.builtin.apt:
+        upgrade: dist
+        force_apt_get: true
     - name: Install utils
-      apt:
+      ansible.builtin.apt:
         pkg:
           - ca-certificates
           - curl
@@ -20,7 +25,7 @@
         state: latest
         update_cache: true
     - name: Install docker
-      apt:
+      ansible.builtin.apt:
         pkg:
           - docker-ce
           - docker-ce-cli
@@ -29,7 +34,7 @@
         state: latest
         update_cache: true
     - name: Install language components
-      apt:
+      ansible.builtin.apt:
         pkg:
           - node-typescript
           - npm
@@ -44,7 +49,7 @@
         repo: ppa:deadsnakes/ppa
         state: present
     - name: Install ansible
-      apt:
+      ansible.builtin.apt:
         pkg:
           - ansible
           - python3-pip
@@ -55,20 +60,46 @@
         update_cache: true
     - name: Install ansible-pylibssh
       become: yes
-      pip:
+      ansible.builtin.pip:
         name:
           - ansible-pylibssh
     - name: Install docker
-      shell: |
-        sudo mkdir -m 0755 -p /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        chmod a+r /etc/apt/keyrings/docker.gpg
-        echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-
-
+      block:
+        - name: Ensure keyrings directory exists
+          ansible.builtin.file:
+            path: /etc/apt/keyrings
+            state: directory
+            mode: "0755"
+        - name: Download Docker GPG key
+          ansible.builtin.get_url:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            dest: /tmp/docker.gpg
+            mode: "0644"
+        - name: De-armor Docker GPG key
+          ansible.builtin.command: >
+            gpg --dearmor --yes --output /etc/apt/keyrings/docker.gpg /tmp/docker.gpg
+          args:
+            creates: /etc/apt/keyrings/docker.gpg
+        - name: Ensure Docker GPG key permissions
+          ansible.builtin.file:
+            path: /etc/apt/keyrings/docker.gpg
+            mode: "0644"
+        - name: Remove temporary Docker key
+          ansible.builtin.file:
+            path: /tmp/docker.gpg
+            state: absent
+        - name: Determine Docker repository architecture
+          ansible.builtin.set_fact:
+            docker_repo_arch: "{{ (ansible_facts['architecture'] | default(ansible_architecture)) | replace('x86_64', 'amd64') }}"
+        - name: Configure Docker repository
+          ansible.builtin.copy:
+            dest: /etc/apt/sources.list.d/docker.list
+            content: |
+              deb [arch={{ docker_repo_arch }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
+            mode: "0644"
+        - name: Update apt cache after Docker repo addition
+          ansible.builtin.apt:
+            update_cache: true
 
 - name: Reboot please?
   hosts: ubuntu_slave
@@ -77,9 +108,11 @@
   tasks:
     - name: Check if a reboot is needed for Debian and Ubuntu boxes
       register: reboot_required_file
-      stat: path=/var/run/reboot-required get_md5=no
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+        get_md5: false
     - name: Reboot the Debian or Ubuntu server
-      reboot:
+      ansible.builtin.reboot:
         msg: "Reboot initiated due to kernel updates"
         connect_timeout: 5
         reboot_timeout: 300
