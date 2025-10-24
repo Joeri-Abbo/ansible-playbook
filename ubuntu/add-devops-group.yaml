@@ -1,7 +1,7 @@
 ---
 - name: Add devops group
   hosts: ubuntu
-  become: yes
+  become: true
   tasks:
     - name: Create devops group
       ansible.builtin.group:

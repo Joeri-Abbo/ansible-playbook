@@ -1,7 +1,7 @@
 ---
 - name: Add devops group
   hosts: centos
-  become: yes
+  become: true
   tasks:
     - name: Ensure devops group exists
       ansible.builtin.group:

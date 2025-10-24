@@ -5,3 +5,4 @@
   tasks:
     - name: Fix locale
       ansible.builtin.command: localectl set-locale LC_CTYPE=en_NL.UTF-8
+      changed_when: false

@@ -1,3 +1,4 @@
+---
 users:
   - username: USER
     ssh_key: KEY

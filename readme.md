@@ -14,6 +14,7 @@ Install the tooling once with:
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
+ansible-galaxy collection install -r collections/requirements.yml
 ```
 
 If you're limited to Python 3.9, `pip install -r requirements.txt` will fall back to the latest ansible-lint 6.x release via environment markers, so linting still works albeit with slightly older rules.
@@ -31,6 +32,7 @@ Run the linters locally to ensure the playbooks stay healthy:
 
 ```bash
 . .venv/bin/activate  # if you created a virtualenv
+ansible-galaxy collection install -r collections/requirements.yml
 yamllint .
 ansible-lint
 ```
