@@ -4,7 +4,7 @@ A few playbooks to install and configure a few things on a new machine.
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.10+ (needed for the latest ansible-lint)
 - [pip](https://pip.pypa.io/)
 - (Optional) [virtualenv](https://virtualenv.pypa.io/)
 
@@ -15,6 +15,8 @@ python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+If you're limited to Python 3.9, `pip install -r requirements.txt` will fall back to the latest ansible-lint 6.x release via environment markers, so linting still works albeit with slightly older rules.
 
 ## Usage
 
