@@ -1,18 +1,43 @@
-Ansible Playbook
-================
+# Ansible Playbook
+
 A few playbooks to install and configure a few things on a new machine.
 
 ## Requirements
 
-- Ansible
-- Python
+- Python 3.10+ (needed for the latest ansible-lint)
+- [pip](https://pip.pypa.io/)
+- (Optional) [virtualenv](https://virtualenv.pypa.io/)
+
+Install the tooling once with:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+ansible-galaxy collection install -r collections/requirements.yml
+```
+
+If you're limited to Python 3.9, `pip install -r requirements.txt` will fall back to the latest ansible-lint 6.x release via environment markers, so linting still works albeit with slightly older rules.
 
 ## Usage
 
 - Clone the repo
-- Edit the hosts file to include the IP address of the machine you want to configure
-- Specify the users.yaml with the users you want to create
-- Run the playbook
+- Copy `hosts.example` to `hosts` and list the target host(s)
+- Copy `users.example.yaml` to `users.yaml` and define the users you want to create
+- Run the playbook you need, e.g. `ansible-playbook user-create.yaml`
+
+## Quality checks
+
+Run the linters locally to ensure the playbooks stay healthy:
+
+```bash
+. .venv/bin/activate  # if you created a virtualenv
+ansible-galaxy collection install -r collections/requirements.yml
+yamllint .
+ansible-lint
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) executes the same checks on every push and pull request.
 
 ## Playbooks
 

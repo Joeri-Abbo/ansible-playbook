@@ -15,5 +15,5 @@
         shell: /bin/bash
         update_password: on_create
         groups: "{{ item.groups }}"
-        append: yes
+        append: true
       loop: "{{ data.users }}"

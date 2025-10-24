@@ -1,14 +1,14 @@
 ---
 - name: Add devops group
   hosts: ubuntu
-  become: yes
+  become: true
   tasks:
     - name: Create devops group
-      group:
+      ansible.builtin.group:
         name: devops
         state: present
 
     - name: Create devops user
-      user:
+      ansible.builtin.user:
         name: devops
         group: devops

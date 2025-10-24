@@ -1,21 +1,46 @@
 ---
 - name: Install AWS CLI
   hosts: centos_docker
-  become: yes
-  gather_facts: yes
+  become: true
+  gather_facts: true
   tasks:
     - name: Download AWS CLI
-      shell: curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      ansible.builtin.get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/awscliv2.zip
+        mode: "0644"
     - name: Unzip AWS CLI
-      shell: unzip awscliv2.zip
+      ansible.builtin.unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp
+        remote_src: true
     - name: Run installer
-      shell: ./aws/install
+      ansible.builtin.command: /tmp/aws/install
+      args:
+        creates: /usr/local/bin/aws
     - name: Remove zip file
-      shell: rm awscliv2.zip
+      ansible.builtin.file:
+        path: /tmp/awscliv2.zip
+        state: absent
+    - name: Remove extracted installer directory
+      ansible.builtin.file:
+        path: /tmp/aws
+        state: absent
 - name: Install Digital Ocean metrics
   hosts: centos_docker
-  become: yes
-  gather_facts: yes
+  become: true
+  gather_facts: true
   tasks:
     - name: Install DO metrics
-      shell: curl -sSL https://repos.insights.digitalocean.com/install.sh | sudo bash
+      ansible.builtin.get_url:
+        url: https://repos.insights.digitalocean.com/install.sh
+        dest: /tmp/do-agent-install.sh
+        mode: "0755"
+    - name: Run DO metrics installer
+      ansible.builtin.command: /tmp/do-agent-install.sh
+      args:
+        creates: /etc/systemd/system/do-agent.service
+    - name: Remove installer
+      ansible.builtin.file:
+        path: /tmp/do-agent-install.sh
+        state: absent
