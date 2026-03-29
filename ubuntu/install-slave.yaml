@@ -112,7 +112,6 @@
       register: reboot_required_file
       ansible.builtin.stat:
         path: /var/run/reboot-required
-        get_md5: false
     - name: Reboot the Debian or Ubuntu server
       ansible.builtin.reboot:
         msg: "Reboot initiated due to kernel updates"

@@ -5,7 +5,7 @@
   gather_facts: true
   tasks:
     - name: Upgrade all packages
-      ansible.builtin.yum:  # noqa package-latest
+      ansible.builtin.dnf:  # noqa package-latest
         name: "*"
         state: latest
         update_cache: true

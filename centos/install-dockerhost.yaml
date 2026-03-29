@@ -5,7 +5,7 @@
   gather_facts: true
   tasks:
     - name: Upgrade all packages
-      ansible.builtin.yum:  # noqa package-latest
+      ansible.builtin.dnf:  # noqa package-latest
         name: "*"
         state: latest
 - name: Install dependencies
@@ -16,14 +16,14 @@
     - name: Install python3
       vars:
         ansible_python_interpreter: /usr/bin/python
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name: python3
         update_cache: true
         state: present
     - name: Install vim
       vars:
         ansible_python_interpreter: /usr/bin/python
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name:
           - vim
           - vim-enhanced
@@ -32,7 +32,7 @@
     - name: Install epel-release
       vars:
         ansible_python_interpreter: /usr/bin/python
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name:
           - epel-release
         state: present
@@ -40,7 +40,7 @@
     - name: Install htop
       vars:
         ansible_python_interpreter: /usr/bin/python
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name:
           - htop
         state: present
@@ -48,7 +48,7 @@
     - name: Install utils
       vars:
         ansible_python_interpreter: /usr/bin/python
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name:
           - yum-utils
           - device-mapper-persistent-data
@@ -76,7 +76,7 @@
     - name: Install docker
       vars:
         ansible_python_interpreter: /usr/bin/python
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name: docker-ce
         update_cache: true
         state: present
@@ -99,7 +99,7 @@
         gpgcheck: true
         gpgkey: https://repos.influxdata.com/influxdata-archive_compat.key
     - name: Install influxdb
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name: influxdb
         update_cache: true
         state: present
